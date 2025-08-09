@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أبوالنور - لوحة التحكم</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">أبوالنور</div>
+    <div class="sub">لوحة إدارة المتجر</div>
+  </header>
+
+  <main>
+    <aside class="side-menu">
+      <button class="menu-btn" data-target="myStock">بضاعتي</button>
+      <button class="menu-btn" data-target="shortages">النواقص</button>
+      <button class="menu-btn" data-target="marketCompare">مقارنات السوق</button>
+      <button class="menu-btn" data-target="bestSellers">الأكثر مبيعًا</button>
+      <div class="mic-area">
+        <button id="micBtn">🎙️</button>
+        <div id="micStatus">اضغط للتكلم</div>
+      </div>
+    </aside>
+
+    <section class="content-area">
+      <div id="controlsTop">
+        <button id="addBtn">أضف صنف جديد</button>
+        <input id="search" placeholder="ابحث عن صنف..." />
+        <button id="aiAsk">اسأل الـ AI</button>
+      </div>
+
+      <div id="lists">
+        <div id="myStock" class="list active"></div>
+        <div id="shortages" class="list"></div>
+        <div id="marketCompare" class="list"></div>
+        <div id="bestSellers" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- modal add/edit -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modalTitle">أضف صنف</h3>
+      <label>اسم الصنف</label>
+      <input id="itemName" />
+      <label>سعر الشراء (عليّا)</label>
+      <input id="itemPurchase" type="number" step="0.01" />
+      <label>سعر البيع (للزبون)</label>
+      <input id="itemSell" type="number" step="0.01" />
+      <label>الكمية</label>
+      <input id="itemQty" type="number" />
+      <label>رابط صورة (اختياري)</label>
+      <input id="itemImg" />
+      <div class="modal-actions">
+        <button id="saveItem">حفظ</button>
+        <button id="cancelItem">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أبوالنور - لوحة التحكم</title>
+<style>
+:root{ --gold: #d4af37; --bg: #0b0b0b; --muted:#aaa; }
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#050505,#111);color:#fff;font-family:Tahoma, Arial, sans-serif}
+header{padding:28px 18px;text-align:center}
+.logo{font-size:40px;color:var(--gold);text-shadow:0 0 18px rgba(212,175,55,0.5);font-weight:700}
+.sub{color:var(--muted);margin-top:6px}
+main{display:flex;height:calc(100vh - 110px);gap:12px;padding:12px}
+.side-menu{width:220px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.12);padding:12px;border-radius:12px;display:flex;flex-direction:column;align-items:center}
+.menu-btn{width:100%;padding:12px;margin:8px 0;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--gold);cursor:pointer;border-radius:8px;font-size:18px}
+.menu-btn.active{background:var(--gold);color:#000}
+.mic-area{margin-top:auto;text-align:center}
+#micBtn{font-size:20px;padding:10px;border-radius:50%;background:var(--gold);border:none;cursor:pointer}
+.content-area{flex:1;background:rgba(255,255,255,0.02);border-radius:12px;padding:12px;overflow:hidden}
+#controlsTop{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+#addBtn{padding:10px 14px;background:var(--gold);border:none;border-radius:8px;color:#000;cursor:pointer}
+#search{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#fff}
+#lists{height:calc(100% - 60px);overflow:auto;padding-right:8px}
+.list{display:none}
+.list.active{display:block}
+.item-card{display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.item-card img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.03)}
+.item-info{flex:1;text-align:right}
+.item-name{font-size:18px;font-weight:700;color:var(--gold)}
+.item-meta{color:var(--muted);margin-top:6px;display:flex;gap:12px;align-items:center}
+.item-actions button{margin-left:8px;padding:6px 8px;border-radius:6px;border:none;cursor:pointer}
+.modal{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)}
+.hidden{display:none}
+.modal-content{background:#0f0f0f;padding:18px;border-radius:12px;width:90%;max-width:560px;border:1px solid rgba(212,175,55,0.12)}
+.modal-content input{width:100%;padding:10px;margin-top:6px;border-radius:8px;background:#0b0b0b;border:1px solid rgba(255,255,255,0.04);color:#fff}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.success{background:var(--gold);color:#000;padding:8px 16px;border-radius:4px;margin:8px 0}
+.error{background:#dc2626;color:#fff;padding:8px 16px;border-radius:4px;margin:8px 0}
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">أبوالنور</div>
+    <div class="sub">لوحة إدارة المتجر</div>
+  </header>
+
+  <main>
+    <aside class="side-menu">
+      <button class="menu-btn active" data-target="myStock">بضاعتي</button>
+      <button class="menu-btn" data-target="shortages">النواقص</button>
+      <button class="menu-btn" data-target="marketCompare">مقارنات السوق</button>
+      <button class="menu-btn" data-target="bestSellers">الأكثر مبيعًا</button>
+      <div class="mic-area">
+        <button id="micBtn">🎙️</button>
+        <div id="micStatus">اضغط للتكلم</div>
+      </div>
+    </aside>
+
+    <section class="content-area">
+      <div id="controlsTop">
+        <button id="addBtn">أضف صنف جديد</button>
+        <input id="search" placeholder="ابحث عن صنف..." />
+        <button id="aiAsk">اسأل الـ AI</button>
+      </div>
+
+      <div id="message"></div>
+
+      <div id="lists">
+        <div id="myStock" class="list active"></div>
+        <div id="shortages" class="list"></div>
+        <div id="marketCompare" class="list"></div>
+        <div id="bestSellers" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- modal add/edit -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modalTitle">أضف صنف</h3>
+      <label>اسم الصنف</label>
+      <input id="itemName" />
+      <label>سعر الشراء (عليّا)</label>
+      <input id="itemPurchase" type="number" step="0.01" />
+      <label>سعر البيع (للزبون)</label>
+      <input id="itemSell" type="number" step="0.01" />
+      <label>الكمية</label>
+      <input id="itemQty" type="number" />
+      <label>رابط صورة (اختياري)</label>
+      <input id="itemImg" />
+      <div class="modal-actions">
+        <button id="saveItem">حفظ</button>
+        <button id="cancelItem">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const api = {
+  list: '/api/items',
+  add: '/api/items',
+  update: id => `/api/items/${id}`,
+  ai: '/api/ai'
+};
+
+let activeList = 'myStock';
+const lists = ['myStock','shortages','marketCompare','bestSellers'];
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  setupEventListeners();
+  setupSpeech();
+  loadItems();
+});
+
+function setupEventListeners() {
+  document.querySelectorAll('.menu-btn').forEach(b => {
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.menu-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      showList(b.dataset.target);
+    });
+  });
+  
+  document.getElementById('addBtn').addEventListener('click', ()=> openModal());
+  document.getElementById('cancelItem').addEventListener('click', ()=> closeModal());
+  document.getElementById('saveItem').addEventListener('click', saveItem);
+  document.getElementById('aiAsk').addEventListener('click', askAI);
+  document.getElementById('search').addEventListener('input', renderLists);
+}
+
+const modal = document.getElementById('modal');
+const state = { editingId: null, items: [] };
+
+function showMessage(text, type = 'success') {
+  const messageEl = document.getElementById('message');
+  messageEl.className = type;
+  messageEl.textContent = text;
+  setTimeout(() => messageEl.textContent = '', 3000);
+}
+
+async function loadItems(){
+  try {
+    const res = await fetch(api.list);
+    const items = await res.json();
+    state.items = items;
+    renderLists();
+    showMessage('تم تحميل البيانات بنجاح', 'success');
+  } catch (error) {
+    showMessage('خطأ في تحميل البيانات', 'error');
+  }
+}
+
+function showList(id){
+  activeList = id;
+  document.querySelectorAll('.list').forEach(l => l.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  renderLists();
+}
+
+function renderLists(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  lists.forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    let filtered = state.items.filter(it => it.name.toLowerCase().includes(q));
+    
+    // Filter based on active tab
+    if (id === 'shortages') {
+      filtered = filtered.filter(it => it.qty <= 5);
+    }
+    
+    filtered.forEach(it => {
+      const div = document.createElement('div');
+      div.className = 'item-card';
+      div.innerHTML = `
+        <img src="${it.img||'https://via.placeholder.com/150'}" alt="">
+        <div class="item-info">
+          <div class="item-name">${it.name}</div>
+          <div class="item-meta">
+            <div>سعر البيع: <strong>${parseFloat(it.sellPrice).toFixed(2)}</strong> ج</div>
+            <div>الكمية: ${it.qty}</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button onclick="editItem('${it.id}')" style="background:#2563eb;color:white">تعديل</button>
+          <button onclick="deleteItem('${it.id}')" style="background:#dc2626;color:white">حذف</button>
+        </div>
+      `;
+      el.appendChild(div);
+    });
+  });
+}
+
+function openModal(item){
+  modal.classList.remove('hidden');
+  document.getElementById('modalTitle').textContent = item ? 'تعديل صنف' : 'أضف صنف';
+  document.getElementById('itemName').value = item ? item.name : '';
+  document.getElementById('itemPurchase').value = item ? item.purchasePrice : '';
+  document.getElementById('itemSell').value = item ? item.sellPrice : '';
+  document.getElementById('itemQty').value = item ? item.qty : '';
+  document.getElementById('itemImg').value = item ? item.img : '';
+  state.editingId = item ? item.id : null;
+}
+
+function closeModal(){
+  modal.classList.add('hidden');
+  state.editingId = null;
+}
+
+async function saveItem(){
+  const name = document.getElementById('itemName').value.trim();
+  const purchasePrice = parseFloat(document.getElementById('itemPurchase').value || 0);
+  const sellPrice = parseFloat(document.getElementById('itemSell').value || 0);
+  const qty = parseInt(document.getElementById('itemQty').value || 0);
+  const img = document.getElementById('itemImg').value.trim();
+  
+  if (!name) {
+    showMessage('اكتب اسم الصنف', 'error');
+    return;
+  }
+  
+  try {
+    if (state.editingId){
+      const res = await fetch(api.update(state.editingId), { 
+        method:'PUT', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify({ name, purchasePrice, sellPrice, qty, img }) 
+      });
+      if (res.ok) {
+        showMessage('تم تحديث الصنف بنجاح', 'success');
+      }
+    } else {
+      const res = await fetch(api.add, { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify({ name, purchasePrice, sellPrice, qty, img }) 
+      });
+      if (res.ok) {
+        showMessage('تم إضافة الصنف بنجاح', 'success');
+      }
+    }
+    await loadItems();
+    closeModal();
+  } catch (error) {
+    showMessage('خطأ في حفظ البيانات', 'error');
+  }
+}
+
+async function editItem(id){
+  const it = state.items.find(i=>i.id===id);
+  openModal(it);
+}
+
+async function deleteItem(id){
+  if (!confirm('متأكد تحذف الصنف؟')) return;
+  try {
+    const res = await fetch(`/api/items/${id}`, { method:'DELETE' });
+    if (res.ok) {
+      showMessage('تم حذف الصنف بنجاح', 'success');
+      await loadItems();
+    }
+  } catch (error) {
+    showMessage('خطأ في حذف الصنف', 'error');
+  }
+}
+
+async function askAI(){
+  const q = prompt('اسأل الـ AI (مثال: سعر سلك نحاس تركي كام؟ او اقترح سعر بيع لـ بطارية AAA نسبة 20%)');
+  if (!q) return;
+  try {
+    const res = await fetch(api.ai, { 
+      method:'POST', 
+      headers:{'Content-Type':'application/json'}, 
+      body:JSON.stringify({ prompt: q }) 
+    });
+    const j = await res.json();
+    alert(j.text);
+  } catch (error) {
+    showMessage('خطأ في التواصل مع AI', 'error');
+  }
+}
+
+// microphone (Web Speech API)
+const micBtn = document.getElementById('micBtn');
+let recognizing = false;
+let recognition = null;
+
+function setupSpeech(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('micStatus').textContent = 'المايك غير مدعوم';
+    return;
+  }
+  
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ar-EG';
+  recognition.interimResults = false;
+  
+  recognition.onstart = ()=>{ 
+    recognizing = true; 
+    document.getElementById('micStatus').textContent = 'اسمعك...'; 
+  }
+  
+  recognition.onend = ()=>{ 
+    recognizing = false; 
+    document.getElementById('micStatus').textContent = 'اضغط للتكلم'; 
+  }
+  
+  recognition.onresult = (e)=>{
+    const text = e.results[0][0].transcript;
+    document.getElementById('micStatus').textContent = text;
+    
+    // Simple voice command processing
+    if (/اضف|أضف/i.test(text)){
+      const name = text.replace(/اضف|أضف|سعر|شراء|بيع|كمية|كميه/ig, '').trim();
+      const productName = prompt('اسم الصنف (مستخرج من كلامك):', name || '');
+      const purchasePrice = parseFloat(prompt('سعر الشراء؟','0') || '0');
+      const sellPrice = parseFloat(prompt('سعر البيع؟','0') || '0');
+      const qty = parseInt(prompt('الكمية؟','0') || '0');
+      
+      if (productName) {
+        fetch(api.add, { 
+          method:'POST', 
+          headers:{'Content-Type':'application/json'}, 
+          body:JSON.stringify({ name: productName, purchasePrice, sellPrice, qty, img: '' }) 
+        }).then(()=>{
+          loadItems();
+          showMessage('تم إضافة الصنف بالصوت', 'success');
+        });
+      }
+    } else {
+      // Send to AI
+      fetch(api.ai, { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify({ prompt: text }) 
+      }).then(r=>r.json()).then(j=>alert(j.text));
+    }
+  };
+  
+  micBtn.addEventListener('click', ()=>{
+    if (!recognition) return;
+    if (recognizing) recognition.stop(); 
+    else recognition.start();
+  });
+}
+</script>
+</body>
+</html>

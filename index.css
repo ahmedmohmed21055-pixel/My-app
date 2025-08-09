@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #d4af37;
+  --bg: #0b0b0b;
+  --muted: #aaa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #050505, #111);
+  color: #fff;
+  font-family: Tahoma, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.5);
+}
+
+/* Arabic font optimization */
+html[lang="ar"] {
+  font-family: "Tahoma", "Arial", "Cairo", "Amiri", sans-serif;
+}
+
+/* Loading animation */
+@keyframes pulse-gold {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-gold text-black px-4 py-2 rounded-lg font-semibold hover:bg-opacity-90 transition-all duration-200;
+}
+
+.btn-secondary {
+  @apply bg-transparent border border-gold text-gold px-4 py-2 rounded-lg font-semibold hover:bg-gold hover:text-black transition-all duration-200;
+}
+
+/* Form styles */
+.form-input {
+  @apply w-full p-3 rounded-lg bg-background-primary border border-border-secondary text-white placeholder-text-muted focus:border-gold focus:outline-none transition-colors duration-200;
+}
+
+/* Card styles */
+.card {
+  @apply bg-background-accent border border-border-primary rounded-xl p-4 backdrop-blur-sm;
+}
+
+/* Text selection */
+::selection {
+  background: rgba(212, 175, 55, 0.3);
+}
+
+/* Focus styles */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}

@@ -1,0 +1,30 @@
+:root{ --gold: #d4af37; --bg: #0b0b0b; --muted:#aaa; }
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#050505,#111);color:#fff;font-family:Tahoma, Arial, sans-serif}
+header{padding:28px 18px;text-align:center}
+.logo{font-size:40px;color:var(--gold);text-shadow:0 0 18px rgba(212,175,55,0.5);font-weight:700}
+.sub{color:var(--muted);margin-top:6px}
+main{display:flex;height:calc(100vh - 110px);gap:12px;padding:12px}
+.side-menu{width:220px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.12);padding:12px;border-radius:12px;display:flex;flex-direction:column;align-items:center}
+.menu-btn{width:100%;padding:12px;margin:8px 0;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--gold);cursor:pointer;border-radius:8px;font-size:18px}
+.menu-btn.active{background:var(--gold);color:#000}
+.mic-area{margin-top:auto;text-align:center}
+#micBtn{font-size:20px;padding:10px;border-radius:50%;background:var(--gold);border:none;cursor:pointer}
+.content-area{flex:1;background:rgba(255,255,255,0.02);border-radius:12px;padding:12px;overflow:hidden}
+#controlsTop{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+#addBtn{padding:10px 14px;background:var(--gold);border:none;border-radius:8px;color:#000;cursor:pointer}
+#search{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#fff}
+#lists{height:calc(100% - 60px);overflow:auto;padding-right:8px}
+.list{display:none}
+.list.active{display:block}
+.item-card{display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.item-card img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.03)}
+.item-info{flex:1;text-align:right}
+.item-name{font-size:18px;font-weight:700;color:var(--gold)}
+.item-meta{color:var(--muted);margin-top:6px;display:flex;gap:12px;align-items:center}
+.item-actions button{margin-left:8px;padding:6px 8px;border-radius:6px;border:none;cursor:pointer}
+.modal{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)}
+.hidden{display:none}
+.modal-content{background:#0f0f0f;padding:18px;border-radius:12px;width:90%;max-width:560px;border:1px solid rgba(212,175,55,0.12)}
+.modal-content input{width:100%;padding:10px;margin-top:6px;border-radius:8px;background:#0b0b0b;border:1px solid rgba(255,255,255,0.04);color:#fff}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
